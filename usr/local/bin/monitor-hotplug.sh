@@ -12,9 +12,9 @@ export DISPLAY=":$displaynum"
 
 uid=$(ck-list-sessions | awk 'BEGIN { unix_user = ""; } /^Session/ { unix_user = ""; } /unix-user =/ { gsub(/'\''/,"",$3); unix_user = $3; } /x11-display = '\'$display\''/ { print unix_user; exit (0); }')
 if [ -n "$uid" ]; then
-	user=$(getent passwd $uid | cut -d: -f1)
-	userhome=$(getent passwd $user | cut -d: -f6)
-	export XAUTHORITY=$userhome/.Xauthority
+        user=$(getent passwd $uid | cut -d: -f1)
+        userhome=$(getent passwd $user | cut -d: -f6)
+        export XAUTHORITY=$userhome/.Xauthority
 else
   echo "unable to find an X session"
   exit 1
@@ -32,15 +32,15 @@ do
   then
 #REMOVE THE -X- part from HDMI-X-n
     dev=HDMI${dev#HDMI-?-}
-  else 
+  else
     dev=$(echo $dev | tr -d '-')
   fi
 
   if [ "connected" == "$status" ]
-  then 
+  then
     echo $dev "connected"
-    declare $dev="yes"; 
-  
+    declare $dev="yes";
+
   fi
 done <<< "$DEVICES"
 
@@ -48,23 +48,26 @@ done <<< "$DEVICES"
 if [ ! -z "$HDMI1" -a ! -z "$VGA1" ]
 then
   echo "HDMI1 and VGA1 are plugged in"
-  xrandr --output LVDS1 --off
-  xrandr --output VGA1 --mode 1920x1080 --noprimary
-  xrandr --output HDMI1 --mode 1920x1080 --right-of VGA1 --primary
+  xrandr --output VGA1 --mode 1440x900
+  xrandr --output HDMI1 --mode 1920x1080 --right-of VGA1
+
 elif [ ! -z "$HDMI1" -a -z "$VGA1" ]; then
   echo "HDMI1 is plugged in, but not VGA1"
-  xrandr --output LVDS1 --off
   xrandr --output VGA1 --off
   xrandr --output HDMI1 --mode 1920x1080 --primary
+
 elif [ -z "$HDMI1" -a ! -z "$VGA1" ]; then
   echo "VGA1 is plugged in, but not HDMI1"
-  xrandr --output LVDS1 --off
+  xrandr --output VGA1 --mode 1440x900 --pos 1366x0
   xrandr --output HDMI1 --off
-  xrandr --output VGA1 --mode 1920x1080 --primary
+  xrandr --output LVDS1 --mode 1366x768
+
 else
   echo "No external monitors are plugged in"
+  xrandr --output VGA1 --off
   xrandr --output LVDS1 --off
   xrandr --output HDMI1 --off
-  xrandr --output LVDS1 --mode 1366x768 --primary
-fi
+  xrandr --output DP1 --off
+  xrandr --output LVDS1 --mode 1366x768
 
+fi
